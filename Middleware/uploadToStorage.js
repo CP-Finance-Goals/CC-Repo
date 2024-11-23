@@ -3,10 +3,10 @@ import { Storage } from "@google-cloud/storage";
 // Inisialisasi Storage
 const storage = new Storage({
   keyFilename: "./api_key.json", // Ganti dengan file service account JSON
-  projectId: "capstone-brofin-442609", // Ganti dengan ID project GCP
+  projectId: "your project id", // Ganti dengan ID project GCP
 });
 
-const bucketName = "proof-brofin-cp"; // Ganti dengan nama bucket di GCP
+const bucketName = "your bucket name"; // Ganti dengan nama bucket di GCP
 const bucket = storage.bucket(bucketName);
 
 // Fungsi untuk mengunggah file
