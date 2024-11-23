@@ -1,0 +1,7 @@
+runtime: nodejs20 # Versi runtime Node.js yang digunakan (bisa disesuaikan)
+env: standard     # Gunakan environment standar
+
+# Tentukan URL routing
+handlers:
+  - url: /.*
+    script: auto
