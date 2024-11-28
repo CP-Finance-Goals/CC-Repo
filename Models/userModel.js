@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const db = require("../Config/database");
+const moment = require("moment");
 
 const userModel = {
   async createUser(email, password) {
@@ -17,16 +18,16 @@ const userModel = {
     await userRef.set({
       email,
       password: hashedPassword,
-      createdAt: new Date(),
+      createdAt: today,
     });
 
+    const today = moment().format("YYYY-MM-DD HH:mm:ss");
     // Tambahkan detail user
-    const userDetailsRef = userRef.collection("userItems").doc("userProfile");
+    const userDetailsRef = userRef.collection("userProfile").doc(newId);
     await userDetailsRef.set({
       userId: newId, // Simpan sebagai integer
       email,
-      point: 0,
-      createdAt: new Date(),
+      createdAt: today,
     });
 
     return { id: newId, email };
@@ -48,7 +49,7 @@ const userModel = {
   async updateUserDetails(userId, updates) {
     const id = userId.toString();
     const userRef = db.collection("users").doc(id);
-    const userDetailsRef = userRef.collection("userItems").doc("userProfile");
+    const userDetailsRef = userRef.collection("userProfile").doc(userId);
 
     const detailsDoc = await userDetailsRef.get();
     if (!detailsDoc.exists) {

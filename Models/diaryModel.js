@@ -37,20 +37,6 @@ const diaryModel = {
       isExpense,
     });
 
-    //adding point into userprofile
-    try {
-      const userRef = db.collection("users").doc(userId.toString());
-      const itemRef = userRef.collection("userItems").doc("userProfile");
-
-      await itemRef.update({
-        point: newId,
-      });
-
-      console.log("Point has been updated");
-    } catch (error) {
-      console.error("Error updating point:", error);
-    }
-
     return { msg: "Successfully added budgeting diary" };
   },
 

@@ -50,7 +50,7 @@ const userController = {
 
   async updateDetails(req, res) {
     const { userId } = req.user;
-    const { username, gender, dob } = req.body;
+    const { username, gender, dob, savings } = req.body;
     let profilePicUrl = null;
 
     if (req.file) {
@@ -62,6 +62,7 @@ const userController = {
       username,
       gender,
       dob,
+      savings,
       profilePicUrl,
     };
 
