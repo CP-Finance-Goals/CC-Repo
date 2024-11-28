@@ -1,29 +1,30 @@
-import express from "express";
-import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import db from "./config/database.js";
-import router from "./Routes/routes.js";
-import budgetingRoutes from "./Routes/budgetingRoute.js";
-import budgetingDiaryRoutes from "./Routes/diaryRoute.js";
-
-dotenv.config();
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const express = require("express");
+const db = require("./Config/database");
+const router = require("./Routes/router");
 
 const app = express();
+require("dotenv").config();
 
-try {
-  await db.authenticate();
-  console.log("database connected...");
-} catch (error) {
-  console.error(error);
-}
+db.listCollections()
+  .then((collections) => {
+    console.log("Tersambung ke Firestore. Koleksi yang ditemukan:");
+    collections.forEach((collection) => console.log(collection.id));
+  })
+  .catch((error) => {
+    console.error("Gagal menghubungkan ke Firestore:", error.message);
+  });
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(cookieParser());
 app.use(express.json());
-app.use("/api", router);
-app.use("/api/budgeting", budgetingRoutes);
-app.use("/api/budgeting-diary", budgetingDiaryRoutes);
+app.use(express.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log("Server running at port", PORT));
+app.use("/api", router);
+
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log(`Server berjalan di http://localhost:${PORT}`);
+});

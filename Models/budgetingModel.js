@@ -1,48 +1,66 @@
-import User from "./userModel.js";
-import { Sequelize } from "sequelize";
-import db from "../config/database.js";
+const db = require("../Config/database");
 
-const { DataTypes } = Sequelize;
+const budgetingModel = {
+  async createNew(req) {
+    const { userId } = req.user;
+    const {
+      monthAndYear,
+      total,
+      essentialNeedsLimit,
+      wantsLimit,
+      savingsLimit,
+      isReminder,
+    } = req.body;
 
-const Budgeting = db.define(
-  "Budgeting",
-  {
-    monthAndYear: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-      primaryKey: true, // PK
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false, // FK ke tabel users
-    },
-    total: {
-      type: DataTypes.DOUBLE,
-      allowNull: false,
-    },
-    essentialNeedsLimit: {
-      type: DataTypes.DOUBLE,
-      allowNull: false,
-    },
-    wantsLimit: {
-      type: DataTypes.DOUBLE,
-      allowNull: false,
-    },
-    savingsLimit: {
-      type: DataTypes.DOUBLE,
-      allowNull: false,
-    },
-    isReminder: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
+    const userRef = db.collection("users").doc(userId.toString());
+    const userBudgetingRef = userRef.collection("budgetings").doc(monthAndYear);
+    await userBudgetingRef.set({
+      monthAndYear,
+      total,
+      essentialNeedsLimit,
+      wantsLimit,
+      savingsLimit,
+      isReminder,
+    });
+
+    return { msg: "Successfully added budget" };
   },
-  {
-    tableName: "budgeting",
-    timestamps: false,
-  }
-);
 
-Budgeting.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+  async updateBudget(req) {
+    const { userId } = req.user;
+    const {
+      monthAndYear,
+      total,
+      essentialNeedsLimit,
+      wantsLimit,
+      savingsLimit,
+      isReminder,
+    } = req.body;
 
-export default Budgeting;
+    const userRef = db.collection("users").doc(userId.toString());
+    const userBudgetingRef = userRef.collection("budgetings").doc(monthAndYear);
+
+    const docSnapshot = await userBudgetingRef.get();
+    if (!docSnapshot.exists) {
+      if (!docSnapshot.exists) {
+        const result = await this.createNew(userId, request);
+        return {
+          msg: "Budgeting for the specified month and year does not exist. Adding new budget...",
+          detail: result,
+        };
+      }
+    }
+
+    await userBudgetingRef.update({
+      total,
+      essentialNeedsLimit,
+      wantsLimit,
+      savingsLimit,
+      isReminder,
+    });
+
+    return { msg: "Budgeting updated successfully" };
+  },
+};
+
+module.exports = budgetingModel;

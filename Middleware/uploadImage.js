@@ -1,10 +1,12 @@
-import multer from "multer";
-import path from "path";
+const multer = require("multer");
+const path = require("path");
 
-// Konfigurasi multer untuk menyimpan file sementara
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png/;
     const mimetype = filetypes.test(file.mimetype);
@@ -15,8 +17,8 @@ const upload = multer({
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb(new Error("Only images are allowed (jpeg, jpg, png)"));
+    cb(new Error("ekstensi gambar yang diperbolehkan hanya (jpeg, jpg, png)"));
   },
 });
 
-export default upload;
+module.exports = upload;

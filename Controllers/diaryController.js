@@ -1,34 +1,41 @@
-import BudgetingDiary from "../Models/diaryModel.js";
-import { uploadToCloud } from "../Middleware/uploadToStorage.js";
+const diaryModel = require("../Models/DiaryModel");
+const uploadToCloud = require("../Middleware/UploadToStorage");
 
-// Get all records
-export const getAllDiaries = async (req, res) => {
-  try {
-    const diaries = await BudgetingDiary.findAll();
-    res.json(diaries);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+const diaryController = {
+  async newDiary(req, res) {
+    const { userId } = req.user;
+    const { monthAndYear, date, description, amount, categoryId, isExpense } =
+      req.body;
 
-// Get a single record by ID
-export const getDiaryById = async (req, res) => {
-  try {
-    const record = await BudgetingDiary.findByPk(req.params.id);
-    if (!record) {
-      return res.status(404).json({ message: "Diary not found" });
+    let proofImgUrl = null;
+
+    if (req.file) {
+      proofImgUrl = await uploadToCloud(req.file, "proof-image"); // URL from Cloud Storage
     }
-    res.json(record);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
-// Create a new record
-export const createDiary = async (req, res) => {
-  try {
+    const diary = {
+      monthAndYear,
+      date,
+      proofImgUrl,
+      description,
+      amount,
+      categoryId,
+      isExpense,
+    };
+
+    try {
+      const result = await diaryModel.createNew(userId, diary);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  async updateDiaries(req, res) {
+    const { userId } = req.user;
     const {
-      userId,
+      diaryId,
       monthAndYear,
       date,
       description,
@@ -37,58 +44,33 @@ export const createDiary = async (req, res) => {
       isExpense,
     } = req.body;
 
-    let photoUri = null;
+    let proofImgUrl;
 
-    // Proses upload file jika ada
     if (req.file) {
-      photoUri = await uploadToCloud(req.file); // Upload ke cloud storage dan dapatkan URL
+      console.log("file diterima");
+      proofImgUrl = await uploadToCloud(req.file, "proof-image"); // URL from Cloud Storage
+    } else {
+      proofImgUrl = req.body.proofImgUrl;
     }
 
-    // Simpan data ke database
-    const newEntry = await BudgetingDiary.create({
-      userId: parseInt(userId, 10),
+    const diary = {
       monthAndYear,
       date,
+      proofImgUrl,
       description,
       amount,
       categoryId,
       isExpense,
-      photoUri, // URL gambar yang dihasilkan
-    });
+    };
 
-    res.status(201).json(newEntry);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create budgeting diary entry" });
-  }
-};
-
-// Update a record by ID
-export const updateDiary = async (req, res) => {
-  try {
-    const [updated] = await BudgetingDiary.update(req.body, {
-      where: { id: req.params.id },
-    });
-    if (!updated) {
-      return res.status(404).json({ message: "Diary not found" });
+    try {
+      const result = await diaryModel.updateDiary(userId, diaryId, diary);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: error.message });
     }
-    res.json({ message: "Diary updated successfully" });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+  },
 };
 
-// Delete a record by ID
-export const deleteDiary = async (req, res) => {
-  try {
-    const deleted = await BudgetingDiary.destroy({
-      where: { id: req.params.id },
-    });
-    if (!deleted) {
-      return res.status(404).json({ message: "Diary not found" });
-    }
-    res.json({ message: "Diary deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+module.exports = diaryController;

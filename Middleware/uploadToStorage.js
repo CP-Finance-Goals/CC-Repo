@@ -1,18 +1,21 @@
-import { Storage } from "@google-cloud/storage";
+const { Storage } = require("@google-cloud/storage");
+require("dotenv").config();
 
 // Inisialisasi Storage
 const storage = new Storage({
-  keyFilename: "./api_key.json", // Ganti dengan file service account JSON
-  projectId: process.env.PROJECT_ID, // Ganti dengan ID project GCP
+  keyFilename: "./storage_key.json", // Replace with your service account JSON path
+  projectId: process.env.PROJECT_ID, // Replace with your GCP project ID
 });
 
-const bucketName = process.env.BUCKET_NAME; // Ganti dengan nama bucket di GCP
+const bucketName = process.env.BUCKET_NAME;
 const bucket = storage.bucket(bucketName);
 
-// Fungsi untuk mengunggah file
-export const uploadToCloud = (file) => {
+const uploadToCloud = async (file, folderName = "") => {
   return new Promise((resolve, reject) => {
-    const blob = bucket.file(Date.now() + "-" + file.originalname);
+    // Create the object name with folder prefix
+    const blob = bucket.file(
+      `${folderName}/${Date.now()}-${file.originalname}`
+    );
     const blobStream = blob.createWriteStream({
       resumable: false,
       contentType: file.mimetype,
@@ -27,3 +30,5 @@ export const uploadToCloud = (file) => {
     blobStream.end(file.buffer);
   });
 };
+
+module.exports = uploadToCloud;
