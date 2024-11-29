@@ -19,7 +19,7 @@
   ```bash
   PORT=your_specified_port
   ACCESS_TOKEN_SECRET=your_jwt_access_secret_key
-  PROJECT_ID=your_GC_Project_id_for_cloudsql_and_bucket
+  PROJECT_ID=your_GC_Project_id
   BUCKET_NAME=your_image_bucket_name
 - setup your key.json and storage_key.json for backend service
   Google Cloud requires a credential file in the form of api_key.json to access various services. Here are the steps to make it:
