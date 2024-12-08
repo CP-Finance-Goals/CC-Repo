@@ -1,6 +1,6 @@
 const userModel = require("../Models/UserModel");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const uploadToCloud = require("../Middleware/UploadToStorage");
 
@@ -8,7 +8,7 @@ dotenv.config();
 
 const userController = {
   async register(req, res) {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
 
     try {
       const existingUser = await userModel.getUserByEmail(email);
@@ -16,11 +16,15 @@ const userController = {
         return res.status(400).json({ message: "Email already used!" });
       }
 
-      const newUser = await userModel.createUser(email, password);
-      res.status(201).json({ message: "Registration successful!", user: newUser });
+      const newUser = await userModel.createUser(email, password, name);
+      res
+        .status(201)
+        .json({ message: "Registration successful!", user: newUser });
     } catch (error) {
       console.error("Error during registration:", error);
-      res.status(500).json({ message: "An error occurred during registration." });
+      res
+        .status(500)
+        .json({ message: "An error occurred during registration." });
     }
   },
 
@@ -50,20 +54,21 @@ const userController = {
 
   async updateDetails(req, res) {
     const { userId } = req.user;
-    const { username, gender, dob, savings } = req.body;
-    
+    const { username, dob, savings } = req.body;
+
     try {
-      let photoUrl = null;
+      let photoUrl;
 
       if (req.file) {
         photoUrl = await uploadToCloud(req.file, "profile-pictures");
+      } else {
+        photoUrl = null;
       }
 
       const updates = {
         username,
-        gender,
-        dob,
-        savings: savings ? parseFloat(savings) : null,
+        dob: dob ? dob.toString() : existingUser.dob,
+        savings: savings ? parseFloat(savings) : existingUser.savings,
         photoUrl,
       };
 
@@ -71,23 +76,9 @@ const userController = {
       res.status(200).json(result);
     } catch (error) {
       console.error("Error during profile update:", error);
-      res.status(500).json({ message: "An error occurred while updating the profile." });
-    }
-  },
-
-  async getProfile(req, res) {
-    const { userId } = req.user;
-
-    try {
-      const profile = await userModel.getUserProfile(userId);
-      if (!profile) {
-        return res.status(404).json({ message: "User not found!" });
-      }
-
-      res.status(200).json(profile);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      res.status(500).json({ message: "An error occurred while fetching the profile." });
+      res
+        .status(500)
+        .json({ message: "An error occurred while updating the profile." });
     }
   },
 
@@ -99,6 +90,24 @@ const userController = {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: error.message });
+    }
+  },
+
+  async deleteUser(req, res) {
+    const { userId, email } = req.user;
+
+    try {
+      const user = await userModel.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      await userModel.deleteUserResources(userId);
+
+      res.status(200).json({ message: "Delete user successful!" });
+    } catch (error) {
+      console.error("deleteUser: Terjadi kesalahan saat penghapusan:", error);
+      res.status(500).json({ message: "An error occurred during deletion." });
     }
   },
 };

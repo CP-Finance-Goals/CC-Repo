@@ -17,19 +17,24 @@ router.put(
   upload.single("image"),
   userController.updateDetails
 );
+
 router.post("/user/balances", verifyToken, balanceController.newBalance);
 router.put("/user/balances", verifyToken, balanceController.updateBalance);
+
 router.post("/user/budgetings", verifyToken, budgetingController.newBudget);
 router.put(
   "/user/budgetings",
   verifyToken,
   budgetingController.updateBudgeting
 );
+
 router.post(
   "/user/diaries",
   verifyToken,
   upload.single("image"),
   diaryController.newDiary
 );
+
+router.delete("/user/delete", verifyToken, userController.deleteUser);
 
 module.exports = router;

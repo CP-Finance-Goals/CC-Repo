@@ -5,12 +5,10 @@ const userBalanceModel = {
     const { userId } = request.user;
     const { monthAndYear, balance, currentBalance } = request.body;
 
-    if (!monthAndYear || typeof monthAndYear !== "number") {
-      throw new Error("Field 'monthAndYear' is required and must be a number.");
-    }
-
     const userRef = db.collection("users").doc(userId.toString());
-    const userBalanceRef = userRef.collection("userBalance").doc(monthAndYear.toString());
+    const userBalanceRef = userRef
+      .collection("userBalance")
+      .doc(monthAndYear.toString());
 
     const balanceData = {
       monthAndYear,
@@ -27,19 +25,18 @@ const userBalanceModel = {
     const { userId } = request.user;
     const { monthAndYear, balance, currentBalance } = request.body;
 
-    if (!monthAndYear || typeof monthAndYear !== "number") {
-      throw new Error("Field 'monthAndYear' is required and must be a number.");
-    }
-
     const userRef = db.collection("users").doc(userId.toString());
-    const userBalanceRef = userRef.collection("userBalance").doc(monthAndYear.toString());
+    const userBalanceRef = userRef
+      .collection("userBalance")
+      .doc(monthAndYear.toString());
 
     const docSnapshot = await userBalanceRef.get();
     if (!docSnapshot.exists) {
       const result = await this.createNew(request);
       return {
-        msg: "Balance for the specified month and year does not exist. Adding new balance...",
-        detail: result,
+        message:
+          "Balance for the specified month and year does not exist. Successfully created new balance",
+        data: result.data,
       };
     }
 
@@ -50,7 +47,10 @@ const userBalanceModel = {
 
     await userBalanceRef.update(updatedBalanceData, { merge: true });
 
-    return { message: "Balance updated successfully", data: updatedBalanceData };
+    return {
+      message: "Balance updated successfully",
+      data: updatedBalanceData,
+    };
   },
 };
 
