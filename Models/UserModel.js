@@ -1,9 +1,8 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const db = require("../Config/database");
-const moment = require("moment");
 
 const userModel = {
-  async createUser(email, password) {
+  async createUser(email, password, name) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const snapshot = await db.collection("users").get();
@@ -17,14 +16,11 @@ const userModel = {
       createdAt: new Date(),
     });
 
-    // Add initial user profile
     const userDetailsRef = userRef.collection("userProfile").doc("profile");
     await userDetailsRef.set({
       userId: newId,
-      username: "",
+      username: name,
       email,
-      photoUrl: "",
-      savings: null,
       createdAt: new Date(),
     });
 
@@ -53,10 +49,25 @@ const userModel = {
       throw new Error("User details not found");
     }
 
-    // Merge data baru dengan data lama
-    await userDetailsRef.set(updates, { merge: true });
+    const existingDetails = detailsDoc.data();
 
-    return { message: "User details has been updated" };
+    const mergedUpdates = {
+      username: updates.username || existingDetails.username,
+      dob: updates.dob || existingDetails.dob,
+      savings:
+        updates.savings !== undefined
+          ? updates.savings
+          : existingDetails.savings,
+      photoUrl: updates.photoUrl || existingDetails.photoUrl,
+    };
+
+    // Merge data baru dengan data lama
+    await userDetailsRef.set(mergedUpdates, { merge: true });
+
+    return {
+      message: "User details has been updated",
+      photoUrl: mergedUpdates.photoUrl,
+    };
   },
 
   async getAllData(userId) {
@@ -88,6 +99,34 @@ const userModel = {
       return subcollectionData;
     } catch (error) {
       console.error("Error fetching subcollections:", error);
+      throw error;
+    }
+  },
+
+  async deleteUserResources(userId) {
+    try {
+      const userRef = db.collection("users").doc(userId.toString());
+      const userDetailsRef = userRef.collection("userProfile").doc("profile");
+      const diariesRef = userRef.collection("budgeting_diaries");
+
+      const userSnapshot = await userDetailsRef.get();
+      const userData = userSnapshot.data();
+
+      if (userData && userData.photoUrl) {
+        await deleteImage(userData.photoUrl);
+      }
+
+      const diariesSnapshot = await diariesRef.get();
+      diariesSnapshot.forEach(async (diaryDoc) => {
+        const data = diaryDoc.data();
+        if (data && data.photoUrl) {
+          await deleteImage(data.photoUrl);
+        }
+      });
+    } catch (error) {
+      console.error(
+        `deleteUserResources: Gagal menghapus resource: ${error.message}`
+      );
       throw error;
     }
   },

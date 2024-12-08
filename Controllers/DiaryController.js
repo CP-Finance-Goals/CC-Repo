@@ -6,9 +6,8 @@ const diaryController = {
     const { userId } = req.user;
     const { monthAndYear, date, description, amount, categoryId } = req.body;
 
-    let photoUrl = null;
+    let photoUrl;
 
-    // Upload image jika ada file
     if (req.file) {
       try {
         photoUrl = await uploadToCloud(req.file, "diary-photos");
@@ -16,6 +15,8 @@ const diaryController = {
         console.error("Error uploading image:", error);
         return res.status(500).json({ message: "Failed to upload image." });
       }
+    } else {
+      photoUrl = null;
     }
 
     const diary = {

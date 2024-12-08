@@ -14,7 +14,9 @@ const budgetingModel = {
     console.log(userId);
     console.log(monthAndYear);
     const userRef = db.collection("users").doc(userId.toString());
-    const userBudgetingRef = userRef.collection("budgetings").doc(monthAndYear.toString());
+    const userBudgetingRef = userRef
+      .collection("budgetings")
+      .doc(monthAndYear.toString());
     await userBudgetingRef.set({
       monthAndYear,
       total,
@@ -39,7 +41,9 @@ const budgetingModel = {
     } = req.body;
 
     const userRef = db.collection("users").doc(userId.toString());
-    const userBudgetingRef = userRef.collection("budgetings").doc(monthAndYear.toString());
+    const userBudgetingRef = userRef
+      .collection("budgetings")
+      .doc(monthAndYear.toString());
 
     const docSnapshot = await userBudgetingRef.get();
     if (!docSnapshot.exists) {
