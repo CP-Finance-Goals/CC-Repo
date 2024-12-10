@@ -3,6 +3,7 @@ const userController = require("../Controllers/UserController");
 const balanceController = require("../Controllers/BalanceController");
 const budgetingController = require("../Controllers/BudgetingController");
 const diaryController = require("../Controllers/DiaryController");
+const expensesController = require("../Controllers/ExpensesController");
 const verifyToken = require("../Middleware/VerifyToken");
 const upload = require("../Middleware/UploadImage");
 
@@ -10,6 +11,7 @@ const router = express.Router();
 
 router.post("/auth/register", userController.register);
 router.post("/auth/login", userController.login);
+
 router.get("/user/getAll", verifyToken, userController.getData);
 router.put(
   "/user/details",
@@ -35,6 +37,17 @@ router.post(
   diaryController.newDiary
 );
 
-router.delete("/user/delete", verifyToken, userController.deleteUser);
+router.post(
+  "/user/expenses",
+  verifyToken,
+  upload.single("image"),
+  expensesController.newExpenses
+);
+router.put(
+  "/user/expenses",
+  verifyToken,
+  upload.single("image"),
+  expensesController.updateExpenses
+);
 
 module.exports = router;

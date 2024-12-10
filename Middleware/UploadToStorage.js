@@ -10,8 +10,10 @@ const storage = new Storage({
 const bucketName = process.env.BUCKET_NAME;
 const bucket = storage.bucket(bucketName);
 
-const uploadToCloud = async (file, folderName = "") => {
-  return new Promise((resolve, reject) => {
+const uploadToCloud = async (file, folderName) => {
+  if (!file) return null;
+
+  try {
     // Create the object name with folder prefix
     const blob = bucket.file(
       `${folderName}/${Date.now()}-${file.originalname}`
@@ -21,14 +23,23 @@ const uploadToCloud = async (file, folderName = "") => {
       contentType: file.mimetype,
     });
 
-    blobStream.on("error", (err) => reject(err));
-    blobStream.on("finish", () => {
-      const publicUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
-      resolve(publicUrl);
-    });
+    return new Promise((resolve, reject) => {
+      blobStream.on("error", (err) => {
+        console.error(`Error uploading image to ${folderName}:`, err);
+        reject(new Error("Failed to upload image."));
+      });
 
-    blobStream.end(file.buffer);
-  });
+      blobStream.on("finish", () => {
+        const publicUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+        resolve(publicUrl);
+      });
+
+      blobStream.end(file.buffer);
+    });
+  } catch (error) {
+    console.error(`Unexpected error uploading image to ${folderName}:`, error);
+    throw new Error("Failed to upload image.");
+  }
 };
 
 module.exports = uploadToCloud;

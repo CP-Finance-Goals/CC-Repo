@@ -9,12 +9,7 @@ const diaryController = {
     let photoUrl;
 
     if (req.file) {
-      try {
-        photoUrl = await uploadToCloud(req.file, "diary-photos");
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        return res.status(500).json({ message: "Failed to upload image." });
-      }
+      photoUrl = await uploadToCloud(req.file, "diary-photos");
     } else {
       photoUrl = null;
     }
