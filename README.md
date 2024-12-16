@@ -1,6 +1,6 @@
 # Brofin Backend
 
-this repository contains router and logic handler code of authentication and database operations in Brofin app
+This repository contains router and logic handler code of authentication and database operations in Brofin app
 
 ## Table of Contents
 
@@ -51,6 +51,7 @@ Deployed link : https://be-brofin.et.r.appspot.com/
 - `/api/user/details`  
   Editing user details  
   Method : PUT  
+  Authorization : Token  
   Input :
 
   ```bash
@@ -65,6 +66,7 @@ Deployed link : https://be-brofin.et.r.appspot.com/
 - `/api/user/balances  `
   Create new balance and edit balances information  
   Method : POST (create), PUT (edit)  
+  Authorization : Token  
   Input :
 
   ```bash
@@ -78,6 +80,7 @@ Deployed link : https://be-brofin.et.r.appspot.com/
 - `/api/user/budgetings`  
   Create new budgeting and edit budgetings information  
   Method : POST (create), PUT (edit)  
+  Authorization : Token  
   Input :
 
   ```bash
@@ -94,6 +97,7 @@ Deployed link : https://be-brofin.et.r.appspot.com/
 - `/api/user/diaries`  
   Creating new diary of transaction  
   Method : POST  
+  Authorization : Token  
   Input :
 
   ```bash
@@ -110,6 +114,7 @@ Deployed link : https://be-brofin.et.r.appspot.com/
 - `/api/user/expenses`  
   Add new expenses (budgeting, balance, user details) and edit expenses (budgeting, balance, diary) information  
   Method : POST (add), PUT (edit)  
+  Authorization : Token  
   POST Input :
 
   ```bash
@@ -151,7 +156,8 @@ Deployed link : https://be-brofin.et.r.appspot.com/
 
 - `/api/user/getAll`  
   Get all of user Informations such as details, balaces, diaries, budgetings  
-  Method : GET
+  Method : GET  
+  Authorization : Token  
 
 ---
 
