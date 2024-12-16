@@ -21,6 +21,7 @@ This backend created using express js as server framework, jsonwebtoken as authe
 ---
 
 ### Endpoints
+Deployed link : https://be-brofin.et.r.appspot.com/
 
 - `/api/auth/register`  
   Creating new user authentication data on database  
